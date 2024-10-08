@@ -52,7 +52,7 @@ const App = () => {
   const handleGuess = () => {
     if (isAnswerCorrect(userGuess, cardPairs[currCard].A)) {
       setFeedback('Correct!');
-      setCurrentStreak(prev => {
+      setCurrStreak(prev => {
         const newStreak = prev + 1;
         if (newStreak > longestStreak) setLongestStreak(newStreak);
         return newStreak;
