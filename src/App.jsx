@@ -2,7 +2,7 @@ import './App.css';
 import { useState } from 'react';
 
 const App = () => {
-  const cardPairs = [
+  const initCardPairs = [
     { Q: "Freedom of Religion, Speech, Press, Assembly, and Petition", A: "Amendment 1", },
     { Q: "Right to bear arms", A: "Amendment 2"},
     { Q: "Restrict Quartering of soldiers", A: "Amendment 3"},
@@ -15,10 +15,22 @@ const App = () => {
     { Q: "Federal Govt only has powers through Constitution; all other powers for the states", A: "Amendment 10"},
   ];
 
+  const [cardPairs, setCardPairs] = useState(initCardPairs);
   const [currCard, setCurrCard] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [userGuess, setUserGuess] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [currStreak, setCurrStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
+
+  const shuffleCards = () => {
+    const shuffled = [...cardPairs].sort(() => Math.random() - (1/2));
+    setCardPairs(shuffled);
+    setCurrCard(0);
+    setShowAnswer(false);
+    setFeedback('');
+    setUserGuess('');
+  };
 
   const showCard = (direction) => {
     let newCardIdx = currCard;
@@ -38,26 +50,46 @@ const App = () => {
   };
 
   const handleGuess = () => {
-    if (userGuess.toLowerCase() === cardPairs[currCard].A.toLowerCase()) {
+    if (isAnswerCorrect(userGuess, cardPairs[currCard].A)) {
       setFeedback('Correct!');
+      setCurrentStreak(prev => {
+        const newStreak = prev + 1;
+        if (newStreak > longestStreak) setLongestStreak(newStreak);
+        return newStreak;
+      });
     } else {
-      setFeedback('Incorrect. Try again!');
+      setFeedback('Incorrect. Please try again!');
+      setCurrStreak(0);
     }
   };
 
-  const { Q, A } = cardPairs[currCard];
 
+  const isAnswerCorrect = (guess, answer) => {
+    return guess.toLowerCase() === answer.toLowerCase();
+  };
+
+  const { Q, A } = cardPairs[currCard]
+
+  
   return (
     <div className="App">
       <h1>Bill of Rights</h1>
       <h3>Do you remember the first 10 amendments?</h3>
-      <h4>Number of cards: 10</h4>
+      <h4>Number of cards: {cardPairs.length}</h4>
+      <h4>Current Streak: {currStreak}</h4>
+      <h4>Longest Streak: {longestStreak}</h4>
 
       <div className="card-container">
-        <div className="card" onClick={toggleAnswer}>
-          <div className="question"><strong>{Q}</strong></div>
-          {showAnswer && <div className="answer">{A}</div>}
-        </div>
+        {cardPairs.length > 0 ? (
+          <div className="card" onClick={toggleAnswer}>
+            <div className="question">{Q}</div>
+            {showAnswer && <div className="answer">{A}</div>}
+          </div>
+        ) : (
+          <div className="card">
+            <div className="question"></div>
+          </div>
+        )}
       </div>
 
       <div className="input-container">
@@ -74,6 +106,7 @@ const App = () => {
       <div className="navigation">
         <button onClick={() => showCard('prev')}>Back</button>
         <button onClick={() => showCard('next')}>Next</button>
+        <button onClick={shuffleCards}>Shuffle Cards</button>
       </div>
     </div>
   );
